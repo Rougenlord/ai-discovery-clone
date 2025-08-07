@@ -21,15 +21,15 @@ export const Hero = () => {
         </div>
         
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
-          There's An{" "}
+          Discover The{" "}
           <span className="bg-gradient-hero bg-clip-text text-transparent">
-            AI For That
+            Genius Dash
           </span>
         </h1>
         
         <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-          Discover the perfect AI tool for any task. From content creation to data analysis, 
-          find curated AI solutions that match your needs.
+          Your ultimate AI tools discovery platform. Find the perfect AI solution for any task, 
+          from content creation to data analysis. Join 2.5M+ users discovering the future.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -51,7 +51,7 @@ export const Hero = () => {
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-16 border-t border-secondary">
           <div className="text-center">
-            <div className="text-3xl font-bold text-foreground">5000+</div>
+            <div className="text-3xl font-bold text-foreground">100+</div>
             <div className="text-muted-foreground">AI Tools</div>
           </div>
           <div className="text-center">

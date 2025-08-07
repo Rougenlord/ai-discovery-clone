@@ -3,135 +3,94 @@ import { Header } from "@/components/layout/header";
 import { Hero } from "@/components/sections/hero";
 import { CategoryFilter } from "@/components/sections/category-filter";
 import { ToolsGrid } from "@/components/sections/tools-grid";
-
-// Mock data for AI tools
-const mockTools = [
-  {
-    id: "1",
-    name: "ChatGPT",
-    description: "Advanced AI chatbot for conversations, writing, and problem-solving across various domains.",
-    category: "Chatbots",
-    rating: 4.8,
-    price: "Freemium" as const,
-    url: "https://chat.openai.com"
-  },
-  {
-    id: "2", 
-    name: "Midjourney",
-    description: "AI-powered image generation tool that creates stunning artwork from text descriptions.",
-    category: "Image Generation",
-    rating: 4.7,
-    price: "Paid" as const,
-    url: "https://midjourney.com"
-  },
-  {
-    id: "3",
-    name: "Copy.ai",
-    description: "AI writing assistant that helps create marketing copy, blog posts, and creative content.",
-    category: "Content Creation",
-    rating: 4.5,
-    price: "Freemium" as const,
-    url: "https://copy.ai"
-  },
-  {
-    id: "4",
-    name: "Grammarly",
-    description: "AI-powered writing assistant that checks grammar, spelling, and writing style.",
-    category: "Writing",
-    rating: 4.6,
-    price: "Freemium" as const,
-    url: "https://grammarly.com"
-  },
-  {
-    id: "5",
-    name: "Notion AI",
-    description: "Integrated AI assistant within Notion for enhanced productivity and content creation.",
-    category: "Productivity",
-    rating: 4.4,
-    price: "Freemium" as const,
-    url: "https://notion.so"
-  },
-  {
-    id: "6",
-    name: "Runway ML",
-    description: "Creative AI tools for video editing, image generation, and multimedia content creation.",
-    category: "Video Editing",
-    rating: 4.3,
-    price: "Freemium" as const,
-    url: "https://runwayml.com"
-  },
-  {
-    id: "7",
-    name: "Jasper",
-    description: "AI content platform for creating high-quality marketing copy and blog content.",
-    category: "Content Creation",
-    rating: 4.5,
-    price: "Paid" as const,
-    url: "https://jasper.ai"
-  },
-  {
-    id: "8",
-    name: "Synthesia",
-    description: "AI video generation platform that creates professional videos with AI avatars.",
-    category: "Video Generation",
-    rating: 4.2,
-    price: "Paid" as const,
-    url: "https://synthesia.io"
-  },
-  {
-    id: "9",
-    name: "Zapier",
-    description: "Automation platform with AI features to connect and automate workflows between apps.",
-    category: "Automation",
-    rating: 4.6,
-    price: "Freemium" as const,
-    url: "https://zapier.com"
-  }
-];
-
-const categories = [
-  "All", 
-  "Chatbots", 
-  "Image Generation", 
-  "Content Creation", 
-  "Writing", 
-  "Productivity", 
-  "Video Editing", 
-  "Video Generation", 
-  "Automation"
-];
+import { FeaturedTools } from "@/components/sections/featured-tools";
+import { Stats } from "@/components/sections/stats";
+import { SubmitTool } from "@/components/forms/submit-tool";
+import { SortFilter } from "@/components/ui/sort-filter";
+import { aiTools, categories, sortOptions } from "@/data/ai-tools";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("trending");
+  const [priceFilter, setPriceFilter] = useState("All");
+  const [ratingFilter, setRatingFilter] = useState("All");
+  const [showSubmitForm, setShowSubmitForm] = useState(false);
 
-  const filteredTools = useMemo(() => {
-    let filtered = mockTools;
+  const filteredAndSortedTools = useMemo(() => {
+    let filtered = [...aiTools];
 
+    // Apply category filter
     if (selectedCategory !== "All") {
       filtered = filtered.filter(tool => tool.category === selectedCategory);
     }
 
+    // Apply price filter
+    if (priceFilter !== "All") {
+      filtered = filtered.filter(tool => tool.price === priceFilter);
+    }
+
+    // Apply rating filter
+    if (ratingFilter !== "All") {
+      const minRating = parseFloat(ratingFilter.replace("+", ""));
+      filtered = filtered.filter(tool => tool.rating >= minRating);
+    }
+
+    // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(tool => 
         tool.name.toLowerCase().includes(query) ||
         tool.description.toLowerCase().includes(query) ||
-        tool.category.toLowerCase().includes(query)
+        tool.category.toLowerCase().includes(query) ||
+        tool.tags.some(tag => tag.toLowerCase().includes(query))
       );
     }
 
+    // Apply sorting
+    switch (sortBy) {
+      case "trending":
+        filtered = filtered.sort((a, b) => {
+          if (a.trending && !b.trending) return -1;
+          if (!a.trending && b.trending) return 1;
+          return b.rating - a.rating;
+        });
+        break;
+      case "popular":
+        filtered = filtered.sort((a, b) => {
+          if (a.popular && !b.popular) return -1;
+          if (!a.popular && b.popular) return 1;
+          return b.rating - a.rating;
+        });
+        break;
+      case "rating":
+        filtered = filtered.sort((a, b) => b.rating - a.rating);
+        break;
+      case "newest":
+        filtered = filtered.sort((a, b) => {
+          const dateA = new Date(a.launchDate || "2020-01-01");
+          const dateB = new Date(b.launchDate || "2020-01-01");
+          return dateB.getTime() - dateA.getTime();
+        });
+        break;
+      case "name":
+        filtered = filtered.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      default:
+        break;
+    }
+
     return filtered;
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, sortBy, priceFilter, ratingFilter]);
 
   const toolCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     
     categories.forEach(category => {
       if (category === "All") {
-        counts[category] = mockTools.length;
+        counts[category] = aiTools.length;
       } else {
-        counts[category] = mockTools.filter(tool => tool.category === category).length;
+        counts[category] = aiTools.filter(tool => tool.category === category).length;
       }
     });
 
@@ -140,15 +99,55 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onSearch={setSearchQuery} searchQuery={searchQuery} />
+      <Header 
+        onSearch={setSearchQuery} 
+        searchQuery={searchQuery}
+        onSubmitTool={() => setShowSubmitForm(true)}
+      />
+      
       <Hero />
+      
+      <FeaturedTools tools={aiTools} />
+      
+      <Stats />
+      
       <CategoryFilter 
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
         toolCounts={toolCounts}
       />
-      <ToolsGrid tools={filteredTools} />
+      
+      <div className="container max-w-6xl mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground mb-2">
+              All AI Tools
+            </h2>
+            <p className="text-muted-foreground">
+              Showing {filteredAndSortedTools.length} of {aiTools.length} tools
+            </p>
+          </div>
+        </div>
+        
+        <SortFilter
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          priceFilter={priceFilter}
+          onPriceFilterChange={setPriceFilter}
+          ratingFilter={ratingFilter}
+          onRatingFilterChange={setRatingFilter}
+          className="mb-8"
+        />
+      </div>
+      
+      <ToolsGrid tools={filteredAndSortedTools} />
+      
+      {showSubmitForm && (
+        <div id="submit-tool">
+          <SubmitTool />
+        </div>
+      )}
     </div>
   );
 };

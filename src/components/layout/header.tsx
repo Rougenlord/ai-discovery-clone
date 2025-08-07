@@ -6,9 +6,10 @@ import { Menu, X } from "lucide-react";
 interface HeaderProps {
   onSearch: (query: string) => void;
   searchQuery: string;
+  onSubmitTool?: () => void;
 }
 
-export const Header = ({ onSearch, searchQuery }: HeaderProps) => {
+export const Header = ({ onSearch, searchQuery, onSubmitTool }: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -24,10 +25,10 @@ export const Header = ({ onSearch, searchQuery }: HeaderProps) => {
         {/* Logo */}
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-hero flex items-center justify-center text-white font-bold">
-            T
+            G
           </div>
           <span className="text-xl font-bold text-foreground">
-            There's An AI For That
+            Genius Dash
           </span>
         </div>
 
@@ -58,7 +59,17 @@ export const Header = ({ onSearch, searchQuery }: HeaderProps) => {
             <Button variant="ghost" size="sm">
               Sign In
             </Button>
-            <Button size="sm" className="gradient-button shadow-button">
+            <Button
+              size="sm" 
+              className="gradient-button shadow-button"
+              onClick={() => {
+                if (onSubmitTool) {
+                  onSubmitTool();
+                } else {
+                  document.getElementById('submit-tool')?.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
               Submit Tool
             </Button>
           </div>
@@ -101,7 +112,18 @@ export const Header = ({ onSearch, searchQuery }: HeaderProps) => {
               <Button variant="ghost" size="sm" className="w-full justify-start">
                 Sign In
               </Button>
-              <Button size="sm" className="w-full gradient-button shadow-button">
+              <Button
+                size="sm" 
+                className="w-full gradient-button shadow-button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (onSubmitTool) {
+                    onSubmitTool();
+                  } else {
+                    document.getElementById('submit-tool')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
                 Submit Tool
               </Button>
             </div>

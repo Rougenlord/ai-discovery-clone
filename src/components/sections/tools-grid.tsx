@@ -1,17 +1,8 @@
 import { ToolCard } from "@/components/ui/tool-card";
-
-interface Tool {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  rating: number;
-  price: "Free" | "Freemium" | "Paid";
-  url: string;
-}
+import { AITool } from "@/data/ai-tools";
 
 interface ToolsGridProps {
-  tools: Tool[];
+  tools: AITool[];
   isLoading?: boolean;
 }
 
@@ -75,6 +66,8 @@ export const ToolsGrid = ({ tools, isLoading }: ToolsGridProps) => {
                 rating={tool.rating}
                 price={tool.price}
                 url={tool.url}
+                tags={tool.tags}
+                monthlyVisits={tool.monthlyVisits}
               />
             ))}
           </div>
