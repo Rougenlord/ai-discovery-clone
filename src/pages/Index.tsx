@@ -8,6 +8,12 @@ import { Stats } from "@/components/sections/stats";
 import { SubmitTool } from "@/components/forms/submit-tool";
 import { SortFilter } from "@/components/ui/sort-filter";
 import { Chatbot } from "@/components/chatbot/chatbot";
+import { Benchmarks } from "@/components/features/benchmarks";
+import { WorkspaceBuilder } from "@/components/features/workspace-builder";
+import { ComparisonMatrix } from "@/components/features/comparison-matrix";
+import { CommunityHub } from "@/components/features/community-hub";
+import { IntegrationMarketplace } from "@/components/features/integration-marketplace";
+import { LearningAcademy } from "@/components/features/learning-academy";
 import { aiTools, categories, sortOptions } from "@/data/ai-tools";
 
 const Index = () => {
@@ -143,6 +149,18 @@ const Index = () => {
       </div>
       
       <ToolsGrid tools={filteredAndSortedTools} />
+      
+      <Benchmarks />
+      
+      <WorkspaceBuilder />
+      
+      <ComparisonMatrix />
+      
+      <CommunityHub />
+      
+      <IntegrationMarketplace />
+      
+      <LearningAcademy />
       
       {showSubmitForm && (
         <div id="submit-tool">
