@@ -7,6 +7,7 @@ import { FeaturedTools } from "@/components/sections/featured-tools";
 import { Stats } from "@/components/sections/stats";
 import { SubmitTool } from "@/components/forms/submit-tool";
 import { SortFilter } from "@/components/ui/sort-filter";
+import { Chatbot } from "@/components/chatbot/chatbot";
 import { aiTools, categories, sortOptions } from "@/data/ai-tools";
 
 const Index = () => {
@@ -148,6 +149,8 @@ const Index = () => {
           <SubmitTool />
         </div>
       )}
+      
+      <Chatbot />
     </div>
   );
 };
