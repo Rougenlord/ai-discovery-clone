@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,11 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
-import { Send, Plus, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Send, Plus, X, CheckCircle, Clock, Eye, LogIn } from "lucide-react";
 import { categories, priceFilters } from "@/data/ai-tools";
 
 export const SubmitTool = () => {
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
@@ -21,8 +24,8 @@ export const SubmitTool = () => {
     description: "",
     url: "",
     category: "",
-    price: "",
-    email: "",
+    pricing: "",
+    contactEmail: "",
     additionalInfo: ""
   });
 
@@ -50,36 +53,127 @@ export const SubmitTool = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to submit a tool.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const { error } = await supabase
+        .from('user_submitted_tools')
+        .insert({
+          user_id: user.id,
+          name: formData.name,
+          description: formData.description,
+          url: formData.url,
+          category: formData.category,
+          pricing: formData.pricing,
+          tags: tags,
+          contact_email: formData.contactEmail,
+          additional_info: formData.additionalInfo,
+        });
 
-    toast({
-      title: "Tool Submitted Successfully!",
-      description: "Thank you for your submission. We'll review it within 24-48 hours.",
-      duration: 5000,
-    });
+      if (error) throw error;
 
-    // Reset form
-    setFormData({
-      name: "",
-      description: "",
-      url: "",
-      category: "",
-      price: "",
-      email: "",
-      additionalInfo: ""
-    });
-    setTags([]);
+      // Award achievement for first tool submission
+      const { data: existingTools } = await supabase
+        .from('user_submitted_tools')
+        .select('id')
+        .eq('user_id', user.id);
+
+      if (existingTools && existingTools.length === 1) {
+        await supabase
+          .from('user_achievements')
+          .insert({
+            user_id: user.id,
+            achievement_type: 'first_submission',
+            achievement_name: 'Tool Contributor',
+            achievement_description: 'Submitted your first AI tool to the directory'
+          });
+      }
+
+      toast({
+        title: "Tool submitted successfully!",
+        description: "Thank you for your submission. We'll review it within 24-48 hours.",
+      });
+
+      // Reset form
+      setFormData({
+        name: "",
+        description: "",
+        url: "",
+        category: "",
+        pricing: "",
+        contactEmail: "",
+        additionalInfo: "",
+      });
+      setTags([]);
+    } catch (error: any) {
+      toast({
+        title: "Submission failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+
     setIsSubmitting(false);
   };
 
   const isFormValid = formData.name && formData.description && formData.url && 
-                     formData.category && formData.price && formData.email;
+                     formData.category && formData.pricing && formData.contactEmail;
+
+  if (loading) {
+    return (
+      <section id="submit-tool" className="py-20 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="animate-pulse">Loading...</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!user) {
+    return (
+      <section id="submit-tool" className="py-20 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Submit Your AI Tool
+              </h2>
+              <p className="text-xl text-muted-foreground mb-8">
+                Share your favorite AI tool with our community
+              </p>
+              <Card className="max-w-md mx-auto">
+                <CardContent className="p-8 text-center">
+                  <LogIn className="h-12 w-12 text-primary mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Sign In Required</h3>
+                  <p className="text-muted-foreground mb-4">
+                    You need to be signed in to submit AI tools to our directory.
+                  </p>
+                  <Button onClick={() => window.location.href = '/auth'} className="w-full">
+                    Sign In to Submit Tool
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="py-16 px-4">
+    <section id="submit-tool" className="py-16 px-4">
       <div className="container max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-foreground mb-4">
@@ -163,17 +257,16 @@ export const SubmitTool = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="price">Pricing Model *</Label>
-                      <Select value={formData.price} onValueChange={(value) => handleInputChange("price", value)}>
+                      <Label htmlFor="pricing">Pricing Model *</Label>
+                      <Select value={formData.pricing} onValueChange={(value) => handleInputChange("pricing", value)}>
                         <SelectTrigger className="bg-secondary/50 border-secondary hover:border-primary/50">
                           <SelectValue placeholder="Select pricing" />
                         </SelectTrigger>
                         <SelectContent>
-                          {priceFilters.filter(price => price !== "All").map((price) => (
-                            <SelectItem key={price} value={price}>
-                              {price}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="free">Free</SelectItem>
+                          <SelectItem value="freemium">Freemium</SelectItem>
+                          <SelectItem value="paid">Paid</SelectItem>
+                          <SelectItem value="enterprise">Enterprise</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -215,12 +308,12 @@ export const SubmitTool = () => {
 
                   {/* Contact Information */}
                   <div className="space-y-2">
-                    <Label htmlFor="email">Contact Email *</Label>
+                    <Label htmlFor="contactEmail">Contact Email *</Label>
                     <Input
-                      id="email"
+                      id="contactEmail"
                       type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      value={formData.contactEmail}
+                      onChange={(e) => handleInputChange("contactEmail", e.target.value)}
                       placeholder="your@email.com"
                       className="bg-secondary/50 border-secondary hover:border-primary/50 focus:border-primary"
                       required

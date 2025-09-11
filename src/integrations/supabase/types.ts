@@ -14,7 +14,186 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      onboarding: {
+        Row: {
+          ai_experience: string | null
+          budget_range: string | null
+          company: string | null
+          company_size: string | null
+          completed_at: string
+          created_at: string
+          goals: string[] | null
+          id: string
+          preferred_tools: string[] | null
+          role: string | null
+          use_cases: string[] | null
+          user_id: string
+        }
+        Insert: {
+          ai_experience?: string | null
+          budget_range?: string | null
+          company?: string | null
+          company_size?: string | null
+          completed_at?: string
+          created_at?: string
+          goals?: string[] | null
+          id?: string
+          preferred_tools?: string[] | null
+          role?: string | null
+          use_cases?: string[] | null
+          user_id: string
+        }
+        Update: {
+          ai_experience?: string | null
+          budget_range?: string | null
+          company?: string | null
+          company_size?: string | null
+          completed_at?: string
+          created_at?: string
+          goals?: string[] | null
+          id?: string
+          preferred_tools?: string[] | null
+          role?: string | null
+          use_cases?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          experience_level: string | null
+          full_name: string | null
+          github_url: string | null
+          id: string
+          interests: string[] | null
+          linkedin_url: string | null
+          location: string | null
+          twitter_handle: string | null
+          updated_at: string
+          user_id: string
+          username: string | null
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          experience_level?: string | null
+          full_name?: string | null
+          github_url?: string | null
+          id?: string
+          interests?: string[] | null
+          linkedin_url?: string | null
+          location?: string | null
+          twitter_handle?: string | null
+          updated_at?: string
+          user_id: string
+          username?: string | null
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          experience_level?: string | null
+          full_name?: string | null
+          github_url?: string | null
+          id?: string
+          interests?: string[] | null
+          linkedin_url?: string | null
+          location?: string | null
+          twitter_handle?: string | null
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_description: string | null
+          achievement_name: string
+          achievement_type: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_description?: string | null
+          achievement_name: string
+          achievement_type: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_description?: string | null
+          achievement_name?: string
+          achievement_type?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_submitted_tools: {
+        Row: {
+          additional_info: string | null
+          category: string
+          contact_email: string | null
+          description: string
+          id: string
+          name: string
+          pricing: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          submitted_at: string
+          tags: string[] | null
+          url: string
+          user_id: string
+        }
+        Insert: {
+          additional_info?: string | null
+          category: string
+          contact_email?: string | null
+          description: string
+          id?: string
+          name: string
+          pricing?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string
+          tags?: string[] | null
+          url: string
+          user_id: string
+        }
+        Update: {
+          additional_info?: string | null
+          category?: string
+          contact_email?: string | null
+          description?: string
+          id?: string
+          name?: string
+          pricing?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          submitted_at?: string
+          tags?: string[] | null
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

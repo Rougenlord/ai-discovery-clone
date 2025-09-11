@@ -1,7 +1,11 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { SearchBar } from "@/components/ui/search-bar";
-import { Menu, X } from "lucide-react";
+import React, { useState } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Brain, Search, Menu, X, Plus, User, Settings, LogOut, LogIn } from 'lucide-react';
+import { SearchBar } from '@/components/ui/search-bar';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
@@ -9,7 +13,8 @@ interface HeaderProps {
   onSubmitTool?: () => void;
 }
 
-export const Header = ({ onSearch, searchQuery, onSubmitTool }: HeaderProps) => {
+export const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, onSubmitTool }) => {
+  const { user, loading, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -19,15 +24,21 @@ export const Header = ({ onSearch, searchQuery, onSubmitTool }: HeaderProps) => 
     { label: "Trending", href: "#" },
   ];
 
+  const handleSubmitTool = () => {
+    if (onSubmitTool) {
+      onSubmitTool();
+    } else {
+      document.getElementById('submit-tool')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-secondary glass">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-hero flex items-center justify-center text-white font-bold">
-            G
-          </div>
-          <span className="text-xl font-bold text-foreground">
+          <Brain className="h-8 w-8 text-primary" />
+          <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Genius Dash
           </span>
         </div>
@@ -56,22 +67,62 @@ export const Header = ({ onSearch, searchQuery, onSubmitTool }: HeaderProps) => 
           </div>
           
           <div className="hidden md:flex items-center space-x-2">
-            <Button variant="ghost" size="sm">
-              Sign In
-            </Button>
-            <Button
-              size="sm" 
-              className="gradient-button shadow-button"
-              onClick={() => {
-                if (onSubmitTool) {
-                  onSubmitTool();
-                } else {
-                  document.getElementById('submit-tool')?.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
+            <Button 
+              onClick={handleSubmitTool}
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
+              <Plus className="h-4 w-4" />
               Submit Tool
             </Button>
+
+            {/* Auth Section */}
+            {loading ? (
+              <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+            ) : user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.user_metadata?.avatar_url} />
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {user.email?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <div className="flex items-center justify-start gap-2 p-2">
+                    <div className="flex flex-col space-y-1 leading-none">
+                      <p className="font-medium">{user.user_metadata?.full_name || 'User'}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.location.href = '/profile?tab=settings'}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                onClick={() => window.location.href = '/auth'}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -109,23 +160,43 @@ export const Header = ({ onSearch, searchQuery, onSubmitTool }: HeaderProps) => 
               </a>
             ))}
             <div className="border-t border-secondary pt-4 mt-4 space-y-2">
-              <Button variant="ghost" size="sm" className="w-full justify-start">
-                Sign In
-              </Button>
-              <Button
-                size="sm" 
-                className="w-full gradient-button shadow-button"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  if (onSubmitTool) {
-                    onSubmitTool();
-                  } else {
-                    document.getElementById('submit-tool')?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
+              <Button 
+                onClick={handleSubmitTool}
+                className="w-full justify-start mb-4"
               >
+                <Plus className="h-4 w-4 mr-2" />
                 Submit Tool
               </Button>
+
+              {/* Mobile Auth Section */}
+              {user ? (
+                <div className="space-y-2">
+                  <Button 
+                    onClick={() => window.location.href = '/profile'}
+                    variant="ghost"
+                    className="w-full justify-start"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Button>
+                  <Button 
+                    onClick={signOut}
+                    variant="ghost"
+                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  onClick={() => window.location.href = '/auth'}
+                  className="w-full justify-start"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              )}
             </div>
           </nav>
         </div>
