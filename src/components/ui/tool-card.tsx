@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { RatingDialog } from "@/components/ui/rating-dialog";
 import { ExternalLink, Star, TrendingUp, Users } from "lucide-react";
 
 interface ToolCardProps {
@@ -89,18 +90,32 @@ export const ToolCard = ({
           </div>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex gap-2 p-4">
+        <RatingDialog toolName={name} toolUrl={url || "#"}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <Star className="h-4 w-4 mr-2" />
+            Rate
+          </Button>
+        </RatingDialog>
+        
         <Button 
           variant="default" 
           size="sm" 
-          className="w-full gradient-button shadow-button hover:shadow-button hover:scale-105 transition-smooth"
+          className="flex-1 gradient-button shadow-button hover:shadow-button hover:scale-105 transition-smooth"
           onClick={(e) => {
             e.stopPropagation();
             handleClick();
           }}
         >
           <ExternalLink className="h-4 w-4 mr-2" />
-          Visit Tool
+          Visit
         </Button>
       </CardFooter>
     </Card>

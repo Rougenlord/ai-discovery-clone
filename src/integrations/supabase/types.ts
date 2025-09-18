@@ -113,6 +113,39 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_ratings: {
+        Row: {
+          created_at: string
+          id: string
+          rating: number
+          review: string | null
+          tool_name: string
+          tool_url: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating: number
+          review?: string | null
+          tool_name: string
+          tool_url: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating?: number
+          review?: string | null
+          tool_name?: string
+          tool_url?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_description: string | null

@@ -4,6 +4,7 @@ import { Hero } from "@/components/sections/hero";
 import { CategoryFilter } from "@/components/sections/category-filter";
 import { ToolsGrid } from "@/components/sections/tools-grid";
 import { FeaturedTools } from "@/components/sections/featured-tools";
+import { UserPreferences } from "@/components/sections/user-preferences";
 import { Stats } from "@/components/sections/stats";
 import { SubmitTool } from "@/components/forms/submit-tool";
 import { SortFilter } from "@/components/ui/sort-filter";
@@ -126,6 +127,7 @@ const Index = () => {
       />
       
       <div className="container max-w-6xl mx-auto px-4 py-8">
+        <UserPreferences />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-2">
