@@ -6,25 +6,24 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Star, MessageCircle } from "lucide-react";
+import { Star, StarIcon } from "lucide-react";
 
 interface RatingDialogProps {
   toolName: string;
   toolUrl: string;
-  currentRating?: number;
   children: React.ReactNode;
 }
 
-export const RatingDialog = ({ toolName, toolUrl, currentRating, children }: RatingDialogProps) => {
+export const RatingDialog = ({ toolName, toolUrl, children }: RatingDialogProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [rating, setRating] = useState(currentRating || 0);
+  const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [review, setReview] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const handleRatingSubmit = async () => {
+  const handleSubmit = async () => {
     if (!user) {
       toast({
         title: "Please sign in",
@@ -37,7 +36,7 @@ export const RatingDialog = ({ toolName, toolUrl, currentRating, children }: Rat
     if (rating === 0) {
       toast({
         title: "Please select a rating",
-        description: "Choose from 1 to 5 stars.",
+        description: "You need to select at least 1 star.",
         variant: "destructive",
       });
       return;
@@ -46,6 +45,7 @@ export const RatingDialog = ({ toolName, toolUrl, currentRating, children }: Rat
     setIsSubmitting(true);
 
     try {
+      // Try to upsert the rating (insert or update if exists)
       const { error } = await supabase
         .from('tool_ratings')
         .upsert({
@@ -60,10 +60,12 @@ export const RatingDialog = ({ toolName, toolUrl, currentRating, children }: Rat
 
       toast({
         title: "Rating submitted!",
-        description: "Thank you for rating this tool.",
+        description: "Thank you for your feedback.",
       });
 
       setOpen(false);
+      setRating(0);
+      setReview("");
     } catch (error: any) {
       toast({
         title: "Failed to submit rating",
@@ -75,109 +77,65 @@ export const RatingDialog = ({ toolName, toolUrl, currentRating, children }: Rat
     setIsSubmitting(false);
   };
 
-  if (!user) {
-    return (
-      <Dialog>
-        <DialogTrigger asChild>
-          {children}
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Sign In Required</DialogTitle>
-            <DialogDescription>
-              You need to be signed in to rate tools.
-            </DialogDescription>
-          </DialogHeader>
-          <Button onClick={() => window.location.href = '/auth'}>
-            Sign In
-          </Button>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  const renderStars = () => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <button
+          key={i}
+          type="button"
+          className="p-1"
+          onMouseEnter={() => setHoverRating(i)}
+          onMouseLeave={() => setHoverRating(0)}
+          onClick={() => setRating(i)}
+        >
+          <Star
+            className={`h-6 w-6 transition-colors ${
+              i <= (hoverRating || rating)
+                ? "fill-yellow-400 text-yellow-400"
+                : "text-muted-foreground"
+            }`}
+          />
+        </button>
+      );
+    }
+    return stars;
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Star className="h-5 w-5 text-primary" />
-            Rate {toolName}
-          </DialogTitle>
+          <DialogTitle>Rate {toolName}</DialogTitle>
           <DialogDescription>
-            Share your experience with this AI tool
+            Share your experience with this AI tool to help other users.
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="space-y-6 py-4">
-          {/* Star Rating */}
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label>Your Rating</Label>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoverRating(star)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  className="p-1 hover:scale-110 transition-transform"
-                >
-                  <Star
-                    className={`h-8 w-8 ${
-                      star <= (hoverRating || rating)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-muted-foreground"
-                    }`}
-                  />
-                </button>
-              ))}
+            <div className="flex items-center gap-1">
+              {renderStars()}
             </div>
-            <p className="text-sm text-muted-foreground">
-              {rating > 0 && (
-                <>
-                  {rating === 1 && "Poor"}
-                  {rating === 2 && "Fair"}
-                  {rating === 3 && "Good"}
-                  {rating === 4 && "Very Good"}
-                  {rating === 5 && "Excellent"}
-                </>
-              )}
-            </p>
           </div>
-
-          {/* Review Text */}
           <div className="space-y-2">
-            <Label htmlFor="review" className="flex items-center gap-2">
-              <MessageCircle className="h-4 w-4" />
-              Review (Optional)
-            </Label>
+            <Label htmlFor="review">Review (Optional)</Label>
             <Textarea
               id="review"
               value={review}
               onChange={(e) => setReview(e.target.value)}
               placeholder="Share your thoughts about this tool..."
               className="min-h-[100px]"
-              maxLength={500}
             />
-            <p className="text-xs text-muted-foreground text-right">
-              {review.length}/500 characters
-            </p>
           </div>
-
-          {/* Submit Button */}
-          <div className="flex gap-2 justify-end">
+          <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button 
-              onClick={handleRatingSubmit}
-              disabled={isSubmitting || rating === 0}
-              className="gradient-button"
-            >
+            <Button onClick={handleSubmit} disabled={isSubmitting || rating === 0}>
               {isSubmitting ? "Submitting..." : "Submit Rating"}
             </Button>
           </div>
