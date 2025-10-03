@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,17 +12,19 @@ interface HeaderProps {
   onSearch: (query: string) => void;
   searchQuery: string;
   onSubmitTool?: () => void;
+  onNavigationClick?: (section: string) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, onSubmitTool }) => {
+export const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, onSubmitTool, onNavigationClick }) => {
   const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { label: "New", href: "#" },
-    { label: "Popular", href: "#" },
-    { label: "Categories", href: "#" },
-    { label: "Trending", href: "#" },
+    { label: "New", action: "newest" },
+    { label: "Popular", action: "popular" },
+    { label: "Categories", action: "categories" },
+    { label: "Trending", action: "trending" },
   ];
 
   const handleSubmitTool = () => {
@@ -30,6 +33,13 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, onSubmitT
     } else {
       document.getElementById('submit-tool')?.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const handleNavClick = (action: string) => {
+    if (onNavigationClick) {
+      onNavigationClick(action);
+    }
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -46,13 +56,13 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, onSubmitT
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
-            <a
+            <button
               key={item.label}
-              href={item.href}
+              onClick={() => handleNavClick(item.action)}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-smooth"
             >
               {item.label}
-            </a>
+            </button>
           ))}
         </nav>
 
@@ -98,11 +108,11 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, onSubmitT
                     </div>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => window.location.href = '/profile'}>
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
                     <User className="mr-2 h-4 w-4" />
                     Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => window.location.href = '/profile?tab=settings'}>
+                  <DropdownMenuItem onClick={() => navigate('/profile?tab=settings')}>
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </DropdownMenuItem>
@@ -115,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, onSubmitT
               </DropdownMenu>
             ) : (
               <Button 
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => navigate('/auth')}
                 variant="outline"
                 className="flex items-center gap-2"
               >
@@ -151,13 +161,13 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, onSubmitT
         <div className="md:hidden border-t border-secondary bg-card/95 backdrop-blur-sm">
           <nav className="flex flex-col space-y-1 p-4">
             {navItems.map((item) => (
-              <a
+              <button
                 key={item.label}
-                href={item.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-smooth py-2"
+                onClick={() => handleNavClick(item.action)}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-smooth py-2 text-left"
               >
                 {item.label}
-              </a>
+              </button>
             ))}
             <div className="border-t border-secondary pt-4 mt-4 space-y-2">
               <Button 
@@ -172,7 +182,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, onSubmitT
               {user ? (
                 <div className="space-y-2">
                   <Button 
-                    onClick={() => window.location.href = '/profile'}
+                    onClick={() => navigate('/profile')}
                     variant="ghost"
                     className="w-full justify-start"
                   >
@@ -190,7 +200,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, searchQuery, onSubmitT
                 </div>
               ) : (
                 <Button 
-                  onClick={() => window.location.href = '/auth'}
+                  onClick={() => navigate('/auth')}
                   className="w-full justify-start"
                 >
                   <LogIn className="h-4 w-4 mr-2" />

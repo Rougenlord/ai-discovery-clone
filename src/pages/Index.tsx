@@ -27,6 +27,15 @@ const Index = () => {
   const [ratingFilter, setRatingFilter] = useState("All");
   const [showSubmitForm, setShowSubmitForm] = useState(false);
 
+  const handleNavigationClick = (section: string) => {
+    if (section === "categories") {
+      document.querySelector('.category-filter')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      setSortBy(section);
+      document.querySelector('.tools-grid')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const filteredAndSortedTools = useMemo(() => {
     let filtered = [...aiTools];
 
@@ -113,6 +122,7 @@ const Index = () => {
         onSearch={setSearchQuery} 
         searchQuery={searchQuery}
         onSubmitTool={() => setShowSubmitForm(true)}
+        onNavigationClick={handleNavigationClick}
       />
       
       <Hero />
@@ -121,12 +131,14 @@ const Index = () => {
       
       <Stats />
       
-      <CategoryFilter 
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        toolCounts={toolCounts}
-      />
+      <div className="category-filter">
+        <CategoryFilter 
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          toolCounts={toolCounts}
+        />
+      </div>
       
       <div className="container max-w-6xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -151,7 +163,9 @@ const Index = () => {
         />
       </div>
       
-      <ToolsGrid tools={filteredAndSortedTools} />
+      <div className="tools-grid">
+        <ToolsGrid tools={filteredAndSortedTools} />
+      </div>
       
       <Benchmarks />
       
