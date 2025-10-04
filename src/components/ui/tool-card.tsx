@@ -27,7 +27,11 @@ export const ToolCard = ({
   tags = [],
   monthlyVisits
 }: ToolCardProps) => {
-  const handleClick = () => {
+  const handleClick = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
@@ -35,7 +39,7 @@ export const ToolCard = ({
 
   return (
     <Card className="group gradient-card border-secondary hover:border-primary/50 transition-smooth shadow-card hover:shadow-glow cursor-pointer"
-          onClick={handleClick}>
+          onClick={() => handleClick()}>
       <CardHeader className="space-y-3">
         <div className="flex items-start justify-between">
           <div className="w-12 h-12 rounded-lg bg-gradient-hero flex items-center justify-center text-white font-bold text-lg animate-float">
@@ -109,10 +113,7 @@ export const ToolCard = ({
           variant="default" 
           size="sm" 
           className="flex-1 gradient-button shadow-button hover:shadow-button hover:scale-105 transition-smooth"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleClick();
-          }}
+          onClick={handleClick}
         >
           <ExternalLink className="h-4 w-4 mr-2" />
           Visit
